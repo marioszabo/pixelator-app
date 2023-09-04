@@ -5,9 +5,50 @@
 </head>
 <body>
     <h1>Image Upload</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="image">
-        <input type="submit" value="Upload">
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="image-input" name="image">
+        <input type="hidden" id="api-url" value="YOUR_API_GATEWAY_URL">
+        <button type="button" onclick="uploadImage()">Upload</button>
     </form>
+
+    <script>
+        // Function to upload the image to S3 via API Gateway
+        function uploadImage() {
+            const fileInput = document.getElementById('image-input');
+            const apiUrl = document.getElementById('api-url').value;
+
+            if (!fileInput.files[0]) {
+                alert('Please select an image to upload.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // Configure AWS SDK
+            AWS.config.update({ region: 'YOUR_AWS_REGION' });
+            const s3 = new AWS.S3();
+
+            // Define S3 parameters
+            const params = {
+                Bucket: 'YOUR_BUCKET_NAME',
+                Key: file.name,
+                Body: file,
+                ACL: 'public-read', // Optionally make the uploaded file public
+            };
+
+            // Upload the image to S3
+            s3.upload(params, (err, data) => {
+                if (err) {
+                    console.error(err);
+                    alert('Error uploading image to S3.');
+                } else {
+                    alert('Image uploaded successfully!');
+                    // Optionally, you can redirect or perform other actions here.
+                }
+            });
+        }
+    </script>
 </body>
 </html>
